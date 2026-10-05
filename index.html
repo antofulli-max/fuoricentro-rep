@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="it" class="dark scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AURA — Galleria Fotografica d'Arte</title>
+    
+    <!-- Google Fonts for Editorial Aesthetics -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=Inter:wght@200;300;400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        gallery: {
+                            50: '#f9f9f9',
+                            100: '#f0f0f0',
+                            800: '#18181b',
+                            900: '#0f0f11',
+                            950: '#070708',
+                            gold: '#d4af37',
+                        }
+                    },
+                    fontFamily: {
+                        serif: ['"Cormorant Garamond"', 'serif'],
+                        sans: ['"Inter"', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* Custom scrollbar for museum clean aesthetic */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.05);
+        }
+        .dark ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(150, 150, 150, 0.3);
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(150, 150, 150, 0.5);
+        }
+
+        /* Glassmorphism utility */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        .dark .glass-panel {
+            background: rgba(15, 15, 17, 0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+
+        /* Smooth masonry transitions */
+        .art-card {
+            break-inside: avoid;
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease;
+        }
+        .art-card:hover {
+            transform: translateY(-4px);
+        }
+
+        /* Custom image zoom hover */
+        .img-zoom {
+            transition: transform 0.7s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+        .art-card:hover .img-zoom {
+            transform: scale(1.04);
+        }
+    </style>
+</head>
+<body class="bg-gallery-50 dark:bg-gallery-950 text-zinc-800 dark:text-zinc-200 font-sans transition-colors duration-300 min-h-screen flex flex-col justify-between selection:bg-amber-200 selection:text-black dark:selection:bg-amber-900/60 dark:selection:text-white">
+
+    <!-- Navigation Header -->
+    <header class="sticky top-0 z-40 border-b border-zinc-200/80 dark:border-zinc-800/80 glass-panel transition-colors duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            <!-- Brand Logo -->
+            <a href="#" class="flex flex-col group">
+                <span class="font-serif text-2xl sm:text-3xl tracking-widest uppercase font-light text-zinc-900 dark:text-white group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
+                    AURA
+                </span>
+                <span class="text-[9px] tracking-[0.3em] uppercase text-zinc-400 font-medium">Fine Art Gallery</span>
+            </a>
+
+            <!-- Navigation Links -->
+            <nav class="hidden md:flex items-center space-x-8 text-xs uppercase tracking-widest font-medium">
+                <a href="#gallery" class="text-zinc-600 dark:text-zinc-400 hover:text-black dark:hover:text-white transition-colors">Opere</a>
+                <a href="#about" class="text-zinc-600 dark:text-zinc-400 hover:text-black dark:hover:text-white transition-colors">Artista</a>
+                <a href="#contact" class="text-zinc-600 dark:text-zinc-400 hover:text-black dark:hover:text-white transition-colors">Contatti</a>
+            </nav>
+
+            <!-- Actions Right -->
+            <div class="flex items-center space-x-4">
+                <!-- Upload Button Trigger -->
+                <button onclick="openUploadModal()" class="px-4 py-2 text-xs uppercase tracking-wider font-semibold rounded-full bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 hover:bg-zinc-700 dark:hover:bg-zinc-200 transition-all flex items-center shadow-md hover:shadow-lg">
+                    <i class="fa-solid fa-plus mr-2 text-[10px]"></i> Carica Opera
+                </button>
+
+                <!-- Theme Toggle Button -->
+                <button id="themeToggleBtn" onclick="toggleTheme()" class="w-10 h-10 rounded-full flex items-center justify-center border border-zinc-300 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800/60 transition-colors" title="Cambia Tema">
+                    <i class="fa-solid fa-moon dark:hidden"></i>
+                    <i class="fa-solid fa-sun hidden dark:block text-amber-400"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow">
+        <!-- Hero Editorial Banner -->
+        <section class="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto text-center border-b border-zinc-200 dark:border-zinc-900">
+            <span class="text-xs uppercase tracking-[0.3em] text-amber-600 dark:text-amber-400 font-medium mb-3 block">
+                Collezione Permanente & Edizioni Limitate
+            </span>
+            <h1 class="font-serif text-4xl sm:text-6xl md:text-7xl font-light text-zinc-900 dark:text-zinc-50 tracking-tight leading-tight max-w-4xl mx-auto">
+                L'Arte della Luce & della Prospettiva Studio
+            </h1>
+            <p class="mt-6 text-sm sm:text-base text-zinc-600 dark:text-zinc-400 max-w-2xl mx-auto font-light leading-relaxed">
+                Un'esplorazione visiva tra paesaggi incontaminati, architetture minimaliste e forme umane. Fotografie stampate su carta Fine Art Museum Etching con certificato d'autenticità.
+            </p>
+        </section>
+
+        <!-- Gallery Section -->
+        <section id="gallery" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <!-- Filter Bar -->
+            <div class="flex flex-wrap items-center justify-between gap-4 mb-10 pb-4 border-b border-zinc-200 dark:border-zinc-800/60">
+                <div class="flex flex-wrap items-center gap-2 sm:gap-3" id="filterContainer">
+                    <!-- Filter buttons generated via JS -->
+                </div>
+                
+                <div class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-widest font-mono">
+                    <span id="artworkCount">0</span> Opere in Esposizione
+                </div>
+            </div>
+
+            <!-- Masonry Photo Grid -->
+            <div id="galleryGrid" class="columns-1 sm:columns-2 lg:columns-3 gap-6 space-y-6">
+                <!-- Dynamic Artwork Cards injected here -->
+            </div>
+
+            <!-- Empty State Container -->
+            <div id="emptyState" class="hidden text-center py-20">
+                <i class="fa-regular fa-image text-4xl text-zinc-300 dark:text-zinc-700 mb-4"></i>
+                <h3 class="font-serif text-2xl text-zinc-500 dark:text-zinc-400">Nessuna opera trovata</h3>
+                <p class="text-xs text-zinc-400 mt-2">Prova a selezionare una diversa categoria o carica una nuova fotografia.</p>
+            </div>
+        </section>
+
+        <!-- Artist Statement Section -->
+        <section id="about" class="py-20 bg-zinc-100/50 dark:bg-zinc-900/30 border-y border-zinc-200 dark:border-zinc-900 mt-12 transition-colors">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+                    <!-- Artist Portrait -->
+                    <div class="lg:col-span-5 relative">
+                        <div class="aspect-[4/5] rounded-lg overflow-hidden shadow-2xl bg-zinc-200 dark:bg-zinc-800 relative">
+                            <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=1000&q=80" 
+                                 alt="Ritratto Fotografo" 
+                                 class="w-full h-full object-cover filter grayscale contrast-105 hover:grayscale-0 transition-all duration-700"
+                                 onerror="this.src='https://placehold.co/800x1000/202020/ffffff?text=Artista'">
+                            <div class="absolute inset-0 border border-black/10 dark:border-white/10 rounded-lg pointer-events-none"></div>
+                        </div>
+                    </div>
+
+                    <!-- Artist Biography & Philosophy -->
+                    <div class="lg:col-span-7 space-y-6">
+                        <span class="text-xs uppercase tracking-[0.3em] text-amber-600 dark:text-amber-400 font-medium">Nota Curatoriale & Biografia</span>
+                        <h2 class="font-serif text-3xl sm:text-4xl text-zinc-900 dark:text-zinc-100 font-light">
+                            "Catturare il silenzio prima che la luce si trasformi in memoria."
+                        </h2>
+                        <div class="space-y-4 text-sm sm:text-base text-zinc-600 dark:text-zinc-400 leading-relaxed font-light">
+                            <p>
+                                Nato a Venezia, il mio lavoro fotografico si concentra sull'intersezione tra lo spazio architettonico moderno e la mutevolezza degli elementi naturali. Ogni scatto è l'esito di una lunga attesa contemplativa, mirata a isolare la sintesi formale dell'opera.
+                            </p>
+                            <p>
+                                Le tirature sono rigorosamente limitate e numerate, stampate con inchiostri ai pigmenti di carbone su carte ad elevatissima durata d'archivio (ISO 9706).
+                            </p>
+                        </div>
+                        
+                        <!-- Mini Highlights Grid -->
+                        <div class="grid grid-cols-3 gap-4 pt-6 border-t border-zinc-200 dark:border-zinc-800">
+                            <div>
+                                <span class="block font-serif text-2xl text-zinc-900 dark:text-white">15+</span>
+                                <span class="text-[10px] uppercase tracking-wider text-zinc-500">Mostre Personali</span>
+                            </div>
+                            <div>
+                                <span class="block font-serif text-2xl text-zinc-900 dark:text-white">50</span>
+                                <span class="text-[10px] uppercase tracking-wider text-zinc-500">Tirature / Opera</span>
+                            </div>
+                            <div>
+                                <span class="block font-serif text-2xl text-zinc-900 dark:text-white">Hahnemühle</span>
+                                <span class="text-[10px] uppercase tracking-wider text-zinc-500">Carta Fine Art</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section id="contact" class="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <span class="text-xs uppercase tracking-[0.3em] text-amber-600 dark:text-amber-400 font-medium mb-2 block">Acquisizioni & Informazioni</span>
+            <h2 class="font-serif text-3xl sm:text-4xl text-zinc-900 dark:text-zinc-100 font-light mb-6">Contatta lo Studio</h2>
+            <p class="text-sm text-zinc-600 dark:text-zinc-400 max-w-lg mx-auto mb-8 font-light">
+                Per richieste di collezionisti, cataloghi completi o appuntamenti in galleria, invia un messaggio diretto.
+            </p>
+            <div class="inline-flex flex-wrap items-center justify-center gap-6">
+                <a href="mailto:info@auragallery.art" class="px-8 py-3 bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 rounded-full text-xs uppercase tracking-widest font-semibold hover:bg-zinc-700 dark:hover:bg-zinc-200 transition-all shadow-lg">
+                    <i class="fa-regular fa-envelope mr-2"></i> Invia un'Email
+                </a>
+                <a href="https://instagram.com" target="_blank" rel="noopener" class="px-8 py-3 border border-zinc-300 dark:border-zinc-700 rounded-full text-xs uppercase tracking-widest font-semibold hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all">
+                    <i class="fa-brands fa-instagram mr-2"></i> Instagram
+                </a>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-zinc-200 dark:border-zinc-900 py-8 bg-zinc-100/30 dark:bg-zinc-950 text-xs text-zinc-500 dark:text-zinc-600">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <p>© <span id="currentYear"></span> AURA Fine Art Photography. Tutti i diritti riservati.</p>
+            <div class="flex space-x-6">
+                <button onclick="resetGalleryData()" class="hover:underline text-zinc-400 hover:text-amber-500">Ripristina Opere Demo</button>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Lightbox / Artwork Detail Modal -->
+    <div id="lightboxModal" class="fixed inset-0 z-50 hidden opacity-0 transition-opacity duration-300 flex items-center justify-center bg-black/90 backdrop-blur-md p-4 sm:p-6 lg:p-10">
+        <div class="relative w-full max-w-6xl max-h-[92vh] bg-zinc-900 rounded-2xl overflow-hidden shadow-2xl flex flex-col lg:flex-row border border-zinc-800 text-zinc-100">
+            <!-- Close Button -->
+            <button onclick="closeLightbox()" class="absolute top-4 right-4 z-20 w-10 h-10 rounded-full bg-black/50 text-white hover:bg-white hover:text-black transition-all flex items-center justify-center">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+
+            <!-- Image Showcase Left Panel -->
+            <div class="lg:w-7/12 bg-black flex items-center justify-center p-4 min-h-[300px] lg:min-h-[550px] relative overflow-hidden">
+                <img id="lightboxImg" src="" alt="" class="max-h-[75vh] w-auto max-w-full object-contain shadow-2xl rounded">
+            </div>
+
+            <!-- Editorial Details Right Panel -->
+            <div class="lg:w-5/12 p-6 sm:p-8 flex flex-col justify-between overflow-y-auto max-h-[50vh] lg:max-h-none border-t lg:border-t-0 lg:border-l border-zinc-800">
+                <div class="space-y-6">
+                    <div>
+                        <span id="lightboxCategory" class="inline-block text-[10px] uppercase tracking-[0.2em] font-mono px-2.5 py-1 bg-amber-500/10 text-amber-400 rounded-full border border-amber-500/20 mb-3">
+                            Paesaggio
+                        </span>
+                        <h2 id="lightboxTitle" class="font-serif text-3xl sm:text-4xl text-white font-light">
+                            Titolo dell'Opera
+                        </h2>
+                        <p id="lightboxYear" class="text-xs text-zinc-500 font-mono mt-1">2024 — Edizione 1 di 10</p>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="space-y-2">
+                        <h4 class="text-xs uppercase tracking-wider text-zinc-400 font-semibold">Descrizione & Visione</h4>
+                        <p id="lightboxDesc" class="text-sm text-zinc-300 font-light leading-relaxed">
+                            Descrizione dettagliata dell'opera d'arte e del processo creativo...
+                        </p>
+                    </div>
+
+                    <!-- Technical Specs Table -->
+                    <div class="pt-4 border-t border-zinc-800 space-y-3">
+                        <h4 class="text-xs uppercase tracking-wider text-zinc-400 font-semibold mb-2">Scheda Tecnica & Dettagli</h4>
+                        <div class="grid grid-cols-2 gap-y-3 gap-x-4 text-xs">
+                            <div>
+                                <span class="text-zinc-500 block">Fotocamera / Modello</span>
+                                <span id="lightboxCam" class="text-zinc-200 font-medium">Hasselblad X2D 100C</span>
+                            </div>
+                            <div>
+                                <span class="text-zinc-500 block">Obiettivo / Focal</span>
+                                <span id="lightboxLens" class="text-zinc-200 font-medium">XCD 38mm f/2.5</span>
+                            </div>
+                            <div>
+                                <span class="text-zinc-500 block">Parametri Scatto</span>
+                                <span id="lightboxExposure" class="text-zinc-200 font-medium">ISO 64 | f/8 | 1/250s</span>
+                            </div>
+                            <div>
+                                <span class="text-zinc-500 block">Dimensioni Stampa</span>
+                                <span id="lightboxSize" class="text-zinc-200 font-medium">120 x 80 cm</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer Acquisition Button -->
+                <div class="pt-6 border-t border-zinc-800 mt-6 flex items-center justify-between">
+                    <div>
+                        <span class="text-[10px] text-zinc-500 uppercase block">Stato Certificato</span>
+                        <span class="text-xs text-emerald-400 font-medium flex items-center">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1.5"></span> Disponibile per acquisizione
+                        </span>
+                    </div>
+                    <a id="lightboxInquireBtn" href="#contact" onclick="closeLightbox()" class="px-5 py-2.5 bg-amber-500 hover:bg-amber-400 text-black text-xs font-semibold uppercase tracking-wider rounded-lg transition-colors">
+                        Richiedi Info
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Upload New Artwork Modal -->
+    <div id="uploadModal" class="fixed inset-0 z-50 hidden opacity-0 transition-opacity duration-300 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 sm:p-6 overflow-y-auto">
+        <div class="relative w-full max-w-2xl bg-white dark:bg-gallery-900 rounded-2xl shadow-2xl border border-zinc-200 dark:border-zinc-800 p-6 sm:p-8 my-8 text-zinc-900 dark:text-zinc-100">
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between pb-4 border-b border-zinc-200 dark:border-zinc-800">
+                <div>
+                    <h3 class="font-serif text-2xl font-light">Carica Nuova Opera</h3>
+                    <p class="text-xs text-zinc-500">Aggiungi la tua fotografia artistica alla galleria vetrina</p>
+                </div>
+                <button onclick="closeUploadModal()" class="text-zinc-400 hover:text-black dark:hover:text-white transition-colors">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+
+            <!-- Form -->
+            <form id="uploadForm" onsubmit="handleUpload(event)" class="mt-6 space-y-4">
+                <!-- Image Input Choice -->
+                <div>
+                    <label class="block text-xs font-medium uppercase tracking-wider text-zinc-600 dark:text-zinc-400 mb-2">Immagine dell'Opera</label>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <!-- Option A: File Upload -->
+                        <div class="border-2 border-dashed border-zinc-300 dark:border-zinc-700 rounded-xl p-4 text-center hover:border-amber-500 transition-colors cursor-pointer relative bg-zinc-50 dark:bg-zinc-800/40">
+                            <input type="file" id="artFileInput" accept="image/*" onchange="previewFile(event)" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full">
+                            <i class="fa-solid fa-cloud-arrow-up text-2xl text-amber-500 mb-2"></i>
+                            <span class="block text-xs font-medium">Sfoglia dal dispositivo</span>
+                            <span id="fileNameDisplay" class="block text-[10px] text-zinc-400 truncate mt-1">PNG, JPG fino a 5MB</span>
+                        </div>
+                        
+                        <!-- Option B: URL Link -->
+                        <div>
+                            <input type="url" id="artUrlInput" placeholder="Oppure incolla URL Immagine (https://...)" class="w-full h-full px-3 py-2 text-xs bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-300 dark:border-zinc-700 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Preview Box -->
+                <div id="imagePreviewContainer" class="hidden relative rounded-lg overflow-hidden h-32 bg-black">
+                    <img id="imagePreview" src="" class="w-full h-full object-contain">
+                </div>
+
+                <!-- Form Inputs Grid -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-medium uppercase tracking-wider text-zinc-600 dark:text-zinc-400 mb-1">Titolo dell'Opera *</label>
+                        <input type="text" id="artTitle" required placeholder="Es. Luce di Mattino" class="w-full px-3 py-2 text-xs bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium uppercase tracking-wider text-zinc-600 dark:text-zinc-400 mb-1">Categoria *</label>
+                        <select id="artCategory" required class="w-full px-3 py-2 text-xs bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none">
+                            <option value="Paesaggio">Paesaggio</option>
+                            <option value="Architettura">Architettura</option>
+                            <option value="Ritratti d'Autore">Ritratti d'Autore</option>
+                            <option value="Concettuale">Concettuale</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-medium uppercase tracking-wider text-zinc-600 dark:text-zinc-400 mb-1">Descrizione Artistica *</label>
+                    <textarea id="artDesc" required rows="3" placeholder="Racconta la storia, la visione o l'ispirazione dietro questa fotografia..." class="w-full px-3 py-2 text-xs bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none"></textarea>
+                </div>
+
+                <!-- Technical Specs Inputs -->
+                <div class="border-t border-zinc-200 dark:border-zinc-800 pt-3">
+                    <span class="text-xs font-semibold uppercase tracking-wider text-amber-600 dark:text-amber-400 block mb-3">Dettagli Tecnici & Stampa</span>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                        <div>
+                            <label class="block text-[10px] text-zinc-500">Anno</label>
+                            <input type="text" id="artYear" placeholder="2024" class="w-full px-2 py-1.5 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-300 dark:border-zinc-700 rounded outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] text-zinc-500">Fotocamera</label>
+                            <input type="text" id="artCam" placeholder="Es. Leica M11" class="w-full px-2 py-1.5 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-300 dark:border-zinc-700 rounded outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] text-zinc-500">Parametri</label>
+                            <input type="text" id="artExposure" placeholder="ISO 100 | f/5.6" class="w-full px-2 py-1.5 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-300 dark:border-zinc-700 rounded outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] text-zinc-500">Dimensioni</label>
+                            <input type="text" id="artSize" placeholder="90x60 cm" class="w-full px-2 py-1.5 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-300 dark:border-zinc-700 rounded outline-none">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Toast Notification Box -->
+                <div id="toastMsg" class="hidden p-3 text-xs rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"></div>
+
+                <!-- Submit Button -->
+                <div class="flex justify-end space-x-3 pt-4 border-t border-zinc-200 dark:border-zinc-800">
+                    <button type="button" onclick="closeUploadModal()" class="px-4 py-2 text-xs uppercase tracking-wider text-zinc-500 hover:text-black dark:hover:text-white">Annulla</button>
+                    <button type="submit" class="px-6 py-2 bg-amber-500 hover:bg-amber-400 text-black text-xs font-semibold uppercase tracking-wider rounded-lg transition-colors shadow-md">
+                        Pubblica Opera
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Default seed artworks data
+        const initialArtworks = [
+            {
+                id: "art-1",
+                title: "Sussurri del Silenzio",
+                category: "Paesaggio",
+                image: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80",
+                description: "Una nebbia mattutina che avvolge le vette alpine al sorgere del sole. Fotografia scattata durante una spedizione in alta quota a -10°C per catturare la quiete incontaminata.",
+                year: "2024",
+                camera: "Hasselblad X2D 100C",
+                lens: "XCD 38mm f/2.5",
+                exposure: "ISO 64 | f/8 | 1/125s",
+                size: "120 x 80 cm"
+            },
+            {
+                id: "art-2",
+                title: "Geometrie d'Ombra",
+                category: "Architettura",
+                image: "https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=1200&q=80",
+                description: "Studio sulle forme minimaliste e sulle ombre proiettate dal cemento a vista in un complesso architettonico contemporaneo a Berlino.",
+                year: "2023",
+                camera: "Leica M11 Monochrom",
+                lens: "Summilux-M 35mm f/1.4",
+                exposure: "ISO 100 | f/5.6 | 1/500s",
+                size: "100 x 100 cm"
+            },
+            {
+                id: "art-3",
+                title: "Sguardo Interiore",
+                category: "Ritratti d'Autore",
+                image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=1200&q=80",
+                description: "Ritratto Fine Art ad alto contrasto chiaroscurale. Un'esplorazione dell'espressività umana priva di orpelli, illuminata da un'unica sorgente di luce naturale.",
+                year: "2024",
+                camera: "Canon EOS R5",
+                lens: "RF 85mm f/1.2L USM",
+                exposure: "ISO 200 | f/2.0 | 1/200s",
+                size: "90 x 60 cm"
+            },
+            {
+                id: "art-4",
+                title: "Echi di Specchio",
+                category: "Concettuale",
+                image: "https://images.unsplash.com/photo-1518837695005-2083093ee35b?auto=format&fit=crop&w=1200&q=80",
+                description: "Riflessi astratti generati dal movimento fluido dell'acqua al tramonto. L'immagine capovolge la percezione visiva classica trasformandosi in pittura fotografica.",
+                year: "2023",
+                camera: "Sony A7R V",
+                lens: "FE 24-70mm f/2.8 GM II",
+                exposure: "ISO 50 | f/11 | 2.5s",
+                size: "150 x 100 cm"
+            },
+            {
+                id: "art-5",
+                title: "Sinfonia di Cristallo",
+                category: "Architettura",
+                image: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1200&q=80",
+                description: "Prospettiva dal basso verso l'alto di un grattacielo a vetrate che riflette le nuvole in movimento veloce.",
+                year: "2024",
+                camera: "Fujifilm GFX 100 II",
+                lens: "GF 23mm f/4 R LM WR",
+                exposure: "ISO 100 | f/9 | 1/250s",
+                size: "120 x 90 cm"
+            },
+            {
+                id: "art-6",
+                title: "Confine Marino",
+                category: "Paesaggio",
+                image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80",
+                description: "Spiaggia incontaminata al crepuscolo. La lunga esposizione trasforma il moto delle onde in una nebbia eterea che incontra la battigia.",
+                year: "2022",
+                camera: "Nikon Z9",
+                lens: "NIKKOR Z 14-24mm f/2.8 S",
+                exposure: "ISO 64 | f/16 | 15s",
+                size: "140 x 70 cm"
+            }
+        ];
+
+        // Categories list
+        const categories = ["Tutti", "Paesaggio", "Architettura", "Ritratti d'Autore", "Concettuale"];
+        
+        // App State
+        let artworks = [];
+        let activeCategory = "Tutti";
+        let uploadedBase64 = null;
+
+        window.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('currentYear').textContent = new Date().getFullYear();
+            loadArtworks();
+            renderCategoryFilters();
+            renderGallery();
+            setupTheme();
+        });
+
+        // Load items from localStorage or fallback to defaults
+        function loadArtworks() {
+            const stored = localStorage.getItem('aura_artworks_v1');
+            if (stored) {
+                try {
+                    artworks = JSON.parse(stored);
+                } catch(e) {
+                    artworks = [...initialArtworks];
+                }
+            } else {
+                artworks = [...initialArtworks];
+                saveArtworks();
+            }
+        }
+
+        function saveArtworks() {
+            localStorage.setItem('aura_artworks_v1', JSON.stringify(artworks));
+        }
+
+        function resetGalleryData() {
+            artworks = [...initialArtworks];
+            saveArtworks();
+            renderGallery();
+            showToast("Galleria ripristinata ai dati di esempio!");
+        }
+
+        // Setup Dark/Light Mode
+        function setupTheme() {
+            if (localStorage.theme === 'light') {
+                document.documentElement.classList.remove('dark');
+            } else {
+                document.documentElement.classList.add('dark');
+            }
+        }
+
+        function toggleTheme() {
+            if (document.documentElement.classList.contains('dark')) {
+                document.documentElement.classList.remove('dark');
+                localStorage.theme = 'light';
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.theme = 'dark';
+            }
+        }
+
+        // Category Filter Buttons Generator
+        function renderCategoryFilters() {
+            const container = document.getElementById('filterContainer');
+            container.innerHTML = categories.map(cat => {
+                const isActive = cat === activeCategory;
+                const activeClasses = isActive 
+                    ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 border-transparent shadow-sm' 
+                    : 'bg-transparent text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-800 hover:border-zinc-400 dark:hover:border-zinc-600';
+                
+                return `<button onclick="setFilter('${cat}')" class="px-4 py-1.5 rounded-full text-xs font-medium uppercase tracking-wider transition-all border ${activeClasses}">
+                    ${cat}
+                </button>`;
+            }).join('');
+        }
+
+        function setFilter(cat) {
+            activeCategory = cat;
+            renderCategoryFilters();
+            renderGallery();
+        }
+
+        // Gallery Render function
+        function renderGallery() {
+            const grid = document.getElementById('galleryGrid');
+            const emptyState = document.getElementById('emptyState');
+            
+            const filtered = activeCategory === "Tutti" 
+                ? artworks 
+                : artworks.filter(item => item.category === activeCategory);
+
+            document.getElementById('artworkCount').textContent = filtered.length;
+
+            if (filtered.length === 0) {
+                grid.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                return;
+            } else {
+                emptyState.classList.add('hidden');
+            }
+
+            grid.innerHTML = filtered.map(item => `
+                <div onclick="openLightbox('${item.id}')" class="art-card group cursor-pointer relative rounded-xl overflow-hidden bg-zinc-200 dark:bg-zinc-900 border border-zinc-200/60 dark:border-zinc-800/60 shadow-sm hover:shadow-xl transition-all duration-300">
+                    <!-- Image -->
+                    <div class="relative overflow-hidden aspect-auto">
+                        <img src="${item.image}" alt="${item.title}" class="img-zoom w-full h-auto object-cover block" loading="lazy" onerror="this.src='https://placehold.co/800x600/18181b/ffffff?text=Opera+Non+Disponibile'">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6">
+                            <span class="text-[10px] uppercase font-mono tracking-widest text-amber-400 mb-1">${item.category}</span>
+                            <h3 class="font-serif text-2xl text-white font-light">${item.title}</h3>
+                            <p class="text-xs text-zinc-300 mt-1 line-clamp-1">${item.description}</p>
+                            <span class="text-[10px] text-zinc-400 mt-3 flex items-center">
+                                <i class="fa-regular fa-eye mr-1.5"></i> Ispeziona Dettagli Tecnici
+                            </span>
+                        </div>
+                    </div>
+                    <!-- Caption Bar for Mobile & Clean Grid -->
+                    <div class="p-4 bg-white dark:bg-gallery-900 flex items-center justify-between border-t border-zinc-100 dark:border-zinc-800/80">
+                        <div>
+                            <h4 class="font-serif text-lg font-light text-zinc-900 dark:text-zinc-100 leading-snug">${item.title}</h4>
+                            <span class="text-[10px] uppercase font-mono text-zinc-400 tracking-wider">${item.category} • ${item.year || '2024'}</span>
+                        </div>
+                        <i class="fa-solid fa-arrow-up-right-from-square text-xs text-zinc-400 group-hover:text-amber-500 transition-colors"></i>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Lightbox Functions
+        function openLightbox(id) {
+            const item = artworks.find(a => a.id === id);
+            if (!item) return;
+
+            document.getElementById('lightboxImg').src = item.image;
+            document.getElementById('lightboxTitle').textContent = item.title;
+            document.getElementById('lightboxCategory').textContent = item.category;
+            document.getElementById('lightboxYear').textContent = `${item.year || '2024'} — Edizione Fine Art`;
+            document.getElementById('lightboxDesc').textContent = item.description;
+            document.getElementById('lightboxCam').textContent = item.camera || 'Hasselblad / Fine Art';
+            document.getElementById('lightboxLens').textContent = item.lens || 'Obiettivo Prime Focus';
+            document.getElementById('lightboxExposure').textContent = item.exposure || 'ISO 100 | Standard';
+            document.getElementById('lightboxSize').textContent = item.size || '100 x 70 cm';
+
+            const modal = document.getElementById('lightboxModal');
+            modal.classList.remove('hidden');
+            setTimeout(() => modal.classList.remove('opacity-0'), 10);
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeLightbox() {
+            const modal = document.getElementById('lightboxModal');
+            modal.classList.add('opacity-0');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                document.body.style.overflow = '';
+            }, 300);
+        }
+
+        // Upload Modal Functions
+        function openUploadModal() {
+            const modal = document.getElementById('uploadModal');
+            modal.classList.remove('hidden');
+            setTimeout(() => modal.classList.remove('opacity-0'), 10);
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeUploadModal() {
+            const modal = document.getElementById('uploadModal');
+            modal.classList.add('opacity-0');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                document.body.style.overflow = '';
+                document.getElementById('uploadForm').reset();
+                document.getElementById('imagePreviewContainer').classList.add('hidden');
+                uploadedBase64 = null;
+            }, 300);
+        }
+
+        // Preview image uploaded locally via FileReader
+        function previewFile(event) {
+            const file = event.target.files[0];
+            if (file) {
+                document.getElementById('fileNameDisplay').textContent = file.name;
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    uploadedBase64 = e.target.result;
+                    const preview = document.getElementById('imagePreview');
+                    preview.src = uploadedBase64;
+                    document.getElementById('imagePreviewContainer').classList.remove('hidden');
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // Handle upload submission
+        function handleUpload(e) {
+            e.preventDefault();
+
+            const urlInput = document.getElementById('artUrlInput').value.trim();
+            const finalImage = uploadedBase64 || urlInput;
+
+            if (!finalImage) {
+                showToast("Seleziona un file di immagine locale oppure inserisci un URL valido!", true);
+                return;
+            }
+
+            const newArtwork = {
+                id: 'art-' + Date.now(),
+                title: document.getElementById('artTitle').value.trim(),
+                category: document.getElementById('artCategory').value,
+                image: finalImage,
+                description: document.getElementById('artDesc').value.trim(),
+                year: document.getElementById('artYear').value.trim() || new Date().getFullYear().toString(),
+                camera: document.getElementById('artCam').value.trim() || "Camera d'Autore",
+                lens: "Prime Lens",
+                exposure: document.getElementById('artExposure').value.trim() || "ISO 100",
+                size: document.getElementById('artSize').value.trim() || "100 x 70 cm"
+            };
+
+            // Prepend new artwork
+            artworks.unshift(newArtwork);
+            saveArtworks();
+            renderGallery();
+
+            showToast("Opera pubblicata con successo nella galleria!");
+            setTimeout(() => {
+                closeUploadModal();
+            }, 1200);
+        }
+
+        function showToast(msg, isError = false) {
+            const toast = document.getElementById('toastMsg');
+            toast.textContent = msg;
+            toast.className = `p-3 text-xs rounded-lg ${isError ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30' : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'}`;
+            toast.classList.remove('hidden');
+            setTimeout(() => toast.classList.add('hidden'), 3500);
+        }
+    </script>
+</body>
+</html>
